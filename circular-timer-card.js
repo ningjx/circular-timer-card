@@ -8,7 +8,7 @@ class CircularTimerCard extends LitElement {
     super();
 
     // Defaults
-    this._bins = 36;
+    this._bins = 60;
     this._padAngle = 1;
     this._cornerRadius = 4;
     this._defaultTimerFill = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
@@ -64,8 +64,8 @@ class CircularTimerCard extends LitElement {
     }
 
     var domain = config.entity.split(".")[0];
-    if (domain !== "timer") {
-      throw new Error("Provided entity is not a timer!");
+    if (domain !== "timer" && domain !== "time") {
+      throw new Error("Provided entity is not a time or timer!");
     }
 
     // Define the action config
@@ -195,28 +195,40 @@ class CircularTimerCard extends LitElement {
       icon = this._icon;
     }
 
-    var a = this._stateObj.attributes.duration.split(':');
-    var d_sec = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+    var domain = this._config.entity.split(".")[0];
+    var a;
+    var d_sec;
+    var proc;
     var rem_sec;
-    if (this._stateObj.state == "active") {
-      if (this._direction == "countup") {
-        rem_sec = d_sec - ((Date.parse(this._stateObj.attributes.finishes_at) - new Date()) / 1000);
-      } else {
-        rem_sec = ((Date.parse(this._stateObj.attributes.finishes_at) - new Date()) / 1000);
-      }
-    } else {
-      if (this._stateObj.state == "paused") {
-        var a1 = this._stateObj.attributes.remaining.split(':');
+    if(domain == "timer"){
+      a = this._stateObj.attributes.duration.split(':');
+      d_sec = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+      if (this._stateObj.state == "active") {
         if (this._direction == "countup") {
-          rem_sec = d_sec - ((+a1[0]) * 60 * 60 + (+a1[1]) * 60 + (+a1[2]));
+          rem_sec = d_sec - ((Date.parse(this._stateObj.attributes.finishes_at) - new Date()) / 1000);
         } else {
-          rem_sec = (+a1[0]) * 60 * 60 + (+a1[1]) * 60 + (+a1[2]);
+          rem_sec = ((Date.parse(this._stateObj.attributes.finishes_at) - new Date()) / 1000);
         }
       } else {
-        rem_sec = d_sec;
+        if (this._stateObj.state == "paused") {
+          var a1 = this._stateObj.attributes.remaining.split(':');
+          if (this._direction == "countup") {
+            rem_sec = d_sec - ((+a1[0]) * 60 * 60 + (+a1[1]) * 60 + (+a1[2]));
+          } else {
+            rem_sec = (+a1[0]) * 60 * 60 + (+a1[1]) * 60 + (+a1[2]);
+          }
+        } else {
+          rem_sec = d_sec;
+        }
       }
+      proc = rem_sec / d_sec;
     }
-    var proc = rem_sec / d_sec;
+    else if(domain == "time"){
+        a = this._stateObj.state.split(':');
+        d_sec = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+        proc = (+a[2]) / 60;
+        rem_sec = d_sec;
+    }
 
     var limitBin = Math.floor(this._bins * proc);
     var colorData = this._generateArcColorData(limitBin);
