@@ -8,6 +8,7 @@ class CircularTimerCard extends LitElement {
     super();
 
     // Defaults
+    this._domain = "timer";
     this._bins = 60;
     this._padAngle = 1;
     this._cornerRadius = 4;
@@ -67,6 +68,7 @@ class CircularTimerCard extends LitElement {
     if (domain !== "timer" && domain !== "time") {
       throw new Error("Provided entity is not a time or timer!");
     }
+    this._domain = domain;
 
     // Define the action config
     this._actionConfig = {
@@ -195,12 +197,11 @@ class CircularTimerCard extends LitElement {
       icon = this._icon;
     }
 
-    var domain = this._config.entity.split(".")[0];
     var a;
     var d_sec;
     var proc;
     var rem_sec;
-    if(domain == "timer"){
+    if(this._domain == "timer"){
       a = this._stateObj.attributes.duration.split(':');
       d_sec = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
       if (this._stateObj.state == "active") {
@@ -223,10 +224,10 @@ class CircularTimerCard extends LitElement {
       }
       proc = rem_sec / d_sec;
     }
-    else if(domain == "time"){
+    else if(this._domain == "time"){
         a = this._stateObj.state.split(':');
         d_sec = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-        proc = (+a[2]) / 60;
+        proc = (+a[2]) / this._bins;
         rem_sec = d_sec;
     }
 
