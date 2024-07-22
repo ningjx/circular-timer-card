@@ -146,13 +146,13 @@ class CircularTimerCard extends LitElement {
         dHour = +timeGap[0];
   
         if (this._circleType === "minute")
-          proc = (dMinute % this._bins + 1)  / this._bins;
+          proc = dMinute % this._bins  / this._bins;
         else if (this._circleType === "hour")
-          proc = (dHour % this._bins + 1) / this._bins;
+          proc = dHour % this._bins / this._bins;
         else if (this._circleType === "second")
-          proc = (dSec % this._bins + 1) / this._bins;
+          proc = dSec % this._bins / this._bins;
   
-        //if(proc == 0) proc = 1;
+        if(dSec > 0 && proc == 0) proc = 1;
         limitBin = Math.floor(this._bins * proc);
       }
     }
@@ -174,9 +174,9 @@ class CircularTimerCard extends LitElement {
   _renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
     return html`
 
-      <div class="header clickable">
+      <div class="header ">
         <div class="innerheader">
-          <div class="icon" style="${iconStyle}">
+          <div class="icon clickable" style="${iconStyle}">
             <ha-icon icon="${icon}" style="color: ${textColor};"></ha-icon>
           </div>
           <div class="info">
@@ -200,7 +200,7 @@ class CircularTimerCard extends LitElement {
     return html`
         <div class="centerlayout clickable">
           <ha-icon class="icon2" icon="${icon}" style="color: ${textColor};"></ha-icon>
-          <span id="countdown" style="color:${textColor};font-size: 350%;">${primaryInfo}</span>
+          <span id="countdown" style="color:${textColor};font-size: 370%;">${primaryInfo}</span>
           <span id="timer-name" style="color:${textColor}; font-size:${this._secondaryInfoSize};">${secondaryInfo}</span>
         </div>
 
@@ -462,7 +462,7 @@ class CircularTimerCard extends LitElement {
       .centerlayout {
         position: absolute;
         width: calc(100% - 32px);
-        height: calc(90% - 32px);
+        height: calc(92% - 32px);
         display: flex;
         flex-direction: column;
         justify-content: space-between; 
@@ -531,8 +531,23 @@ class CircularTimerCard extends LitElement {
         border-radius: 500px;
       }
 
-      /* Click animation */
-      @keyframes clickAnimation {
+      @keyframes clickAnimation1 {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(0.9);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .clickable:active {
+        animation: clickAnimation1 0.2s ease;
+      }
+
+      @keyframes clickAnimation2 {
         0% {
           transform: scale(1);
         }
@@ -544,8 +559,8 @@ class CircularTimerCard extends LitElement {
         }
       }
 
-      .clickable:active {
-        animation: clickAnimation 0.2s ease;
+      .click2:active {
+        animation: clickAnimation2 0.2s ease;
       }
 
       /* Hover effect */
