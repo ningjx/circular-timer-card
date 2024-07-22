@@ -482,7 +482,7 @@ class CircularTimerCard extends LitElement {
         display: flex;
         flex-direction: column;
         justify-content: center;
-
+        width: 100%;
         font-weight: 700;
 
         min-width: 0;
@@ -515,7 +515,7 @@ class CircularTimerCard extends LitElement {
         align-items: center;
         justify-content: center;
 
-        margin-right: 10px;
+        margin-right: 16px;
 
         background: rgba(34, 34, 34, 0.05);
         border-radius: 500px;
