@@ -183,7 +183,7 @@ class CircularTimerCard extends LitElement {
         </div>
       </div>
       
-      <svg viewBox="0 0 100 8">
+      <svg viewBox="0 0 100 8" height="40px">
         <g transform="translate(0,0)">
           ${repeat(this._barData, d => d.id, (d, index) => svg`
             <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
@@ -411,7 +411,7 @@ class CircularTimerCard extends LitElement {
   static get styles() {
     return css`
       ha-card {
-        padding: 10px;
+        padding: 16px;
       }
 
       path:hover {
@@ -439,12 +439,12 @@ class CircularTimerCard extends LitElement {
         justify-content: flex-start;
         cursor: pointer;
 
-        margin-bottom: 10px;
+        margin-bottom: 16px;
       }
       .centerlayout {
         position: absolute;
-        width: calc(100% - 20px);
-        height: calc(90% - 20px);
+        width: calc(100% - 32px);
+        height: calc(90% - 32px);
         display: flex;
         flex-direction: column;
         justify-content: space-between; 
@@ -488,8 +488,8 @@ class CircularTimerCard extends LitElement {
       }
 
       .icon {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
 
         flex-shrink: 0;
 
@@ -504,8 +504,8 @@ class CircularTimerCard extends LitElement {
       }
 
       .icon2 {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
