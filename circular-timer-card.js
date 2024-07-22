@@ -127,34 +127,36 @@ class CircularTimerCard extends LitElement {
     let proc = 0;
     let limitBin = 0; 
 
-    if (this._stateObj.state != "on" )
+    if (this._stateObj.state !== "on" )
       this._history_ready = false;
 
-    if (this._stateObj.state == "on" && !this._history_ready) {
+    if (this._stateObj.state === "on" && !this._fetching && !this._history_ready) {
+      this._history = null;
       this._fetchHistory(this._config.entity);
-      this._history_ready = true;
     }
 
-    if (this._stateObj.state == "on" && this._history) 
+    if (this._stateObj.state === "on" && this._history) 
     {
       this._off_count = 0;
       const onTime = this._getEntityOnTime(this._history);
-      const timeGap = this._calculateTimeDifference(onTime).split(':');
-      dSec = +timeGap[0] * 60 * 60 + +timeGap[1] * 60 + +timeGap[2];
-      dMinute = +timeGap[0] * 60 + +timeGap[1];
-      dHour = +timeGap[0];
-
-      if (this._circleType == "minute")
-        proc = dMinute % this._bins  / this._bins;
-      else if (this._circleType == "hour")
-        proc = dHour % this._bins / this._bins;
-      else
-        proc = dSec % this._bins / this._bins;
-
-      if(proc == 0) proc = 1;
-      limitBin = Math.floor(this._bins * proc);
+      if(onTime){
+        const timeGap = this._calculateTimeDifference(onTime).split(':');
+        dSec = +timeGap[0] * 60 * 60 + +timeGap[1] * 60 + +timeGap[2];
+        dMinute = +timeGap[0] * 60 + +timeGap[1];
+        dHour = +timeGap[0];
+  
+        if (this._circleType === "minute")
+          proc = dMinute % this._bins  / this._bins;
+        else if (this._circleType === "hour")
+          proc = dHour % this._bins / this._bins;
+        else
+          proc = dSec % this._bins / this._bins;
+  
+        if(proc == 0) proc = 1;
+        limitBin = Math.floor(this._bins * proc);
+      }
     }
-    console.log("limitBin proc",limitBin,proc);
+    
     const colorData = this._generateArcColorData(limitBin);
     const textColor = this._getTextColor(proc);
 
@@ -363,22 +365,35 @@ class CircularTimerCard extends LitElement {
   }
 
   _fetchHistory(entity) {
+    this._fetching = true;
     fetch(`/api/history/period?filter_entity_id=${entity}`, {
       headers: { Authorization: `Bearer ${this._config.token}` },
     })
       .then(response => response.json())
       .then(data => {
         this._history = data;
-        //this.requestUpdate();
+        this._history_ready = true;
+        this._fetching = false;
+        this.requestUpdate();
       })
       .catch(error => {
         console.error('Error fetching history:', error);
+        this._fetching = false;
       });
+  }
+  _sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   _getEntityOnTime(history) {
     const data = history[0];
-    return data[data.length - 1].state === "on" ? new Date(data[data.length - 1].last_changed) : null;
+    if(data[data.length - 1].state === "on"){
+      return  new Date(data[data.length - 1].last_changed);
+    }
+    else{
+      this._history_ready = false;
+      return null;
+    }
   }
 
   _calculateTimeDifference(lastOnTime) {
