@@ -173,23 +173,26 @@ class CircularTimerCard extends LitElement {
 
   _renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
     return html`
+
       <div class="header clickable">
-        <div class="icon" style="${iconStyle}">
-          <ha-icon icon="${icon}" style="color: ${textColor};"></ha-icon>
+        <div class="innerheader">
+          <div class="icon" style="${iconStyle}">
+            <ha-icon icon="${icon}" style="color: ${textColor};"></ha-icon>
+          </div>
+          <div class="info">
+            <span class="primary" style="color: ${textColor};">${secondaryInfo}</span>
+            <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
+          </div>
         </div>
-        <div class="info">
-          <span class="primary" style="color: ${textColor};">${secondaryInfo}</span>
-          <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
-        </div>
+
+        <svg viewBox="0 0 100 8" class="minimalsvg">
+          <g transform="translate(0,0)">
+            ${repeat(this._barData, d => d.id, (d, index) => svg`
+              <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
+            `)}
+          </g>
+        </svg>
       </div>
-      
-      <svg viewBox="0 0 100 8" height="40px">
-        <g transform="translate(0,0)">
-          ${repeat(this._barData, d => d.id, (d, index) => svg`
-            <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
-          `)}
-        </g>
-      </svg>
     `;
   }
 
@@ -434,6 +437,15 @@ class CircularTimerCard extends LitElement {
       }
 
       .header {
+        width: 100%;
+        height: 96px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+      }
+
+      .innerheader {
         display: flex;
         padding: 0px;
         justify-content: flex-start;
@@ -441,6 +453,12 @@ class CircularTimerCard extends LitElement {
 
         margin-bottom: 16px;
       }
+
+      .minimalsvg {
+        width: 100%;
+        height: 40px;
+      }
+      
       .centerlayout {
         position: absolute;
         width: calc(100% - 32px);
