@@ -122,7 +122,10 @@ class CircularTimerCard extends LitElement {
     let iconStyle = this._icon === "none" ? "display:none;" : "";
 
     let dSec = 0;
+    let dMinute = 0;
+    let dHour = 0;
     let proc = 0;
+    let limitBin = 0;
 
     if (this._stateObj.state === "on" && !this._isFetchingHistory) {
       this._fetchHistory(this._config.entity);
@@ -132,15 +135,19 @@ class CircularTimerCard extends LitElement {
       const onTime = this._getEntityOnTime(this._history);
       const timeGap = this._calculateTimeDifference(onTime).split(':');
       dSec = +timeGap[0] * 60 * 60 + +timeGap[1] * 60 + +timeGap[2];
+      dMinute = +timeGap[0] * 60 + +timeGap[1];
+      dHour = +timeGap[0];
+
       if (this._circleType === "minute")
-        proc = +timeGap[1] / this._bins;
+        proc = dMinute % this._bins / this._bins;
       else if (this._circleType === "hour")
-        proc = +timeGap[0] / this._bins;
+        proc = dHour % this._bins / this._bins;
       else
-        proc = +timeGap[2] / this._bins;
+        proc = dSec % this._bins / this._bins;
+
+      limitBin = Math.floor(this._bins * proc) + 1;
     }
 
-    const limitBin = Math.floor(this._bins * proc);
     const colorData = this._generateArcColorData(limitBin);
     const textColor = this._getTextColor(proc);
 
@@ -162,11 +169,11 @@ class CircularTimerCard extends LitElement {
           <ha-icon icon="${icon}" style="color: ${textColor};"></ha-icon>
         </div>
         <div class="info">
-          <span class="primary" style="color: ${textColor};">${primaryInfo}</span>
-          <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${secondaryInfo}</span>
+          <span class="primary" style="color: ${textColor};">${secondaryInfo}</span>
+          <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
         </div>
       </div>
-      <svg viewBox="0 0 100 10.2">
+      <svg viewBox="0 0 100 8">
         <g transform="translate(0,0)">
           ${repeat(this._barData, d => d.id, (d, index) => svg`
             <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
@@ -212,7 +219,7 @@ class CircularTimerCard extends LitElement {
     var pad = 1;
 
     var width = (100 + pad) / this._bins - pad;
-    var height = 10;
+    var height = 8;
 
     var data = [];
     for (var i = 0; i < this._bins; i++) {
