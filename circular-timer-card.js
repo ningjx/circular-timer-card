@@ -127,8 +127,12 @@ class CircularTimerCard extends LitElement {
     let proc = 0;
     let limitBin = 0;
 
-    if (this._stateObj.state === "on" && !this._isFetchingHistory) {
+    if (this._stateObj.state !== "on")
+      this._history_ready = false;
+
+    if (this._stateObj.state === "on" && !this._isFetchingHistory && !this._history_ready) {
       this._fetchHistory(this._config.entity);
+      this._history_ready = true;
     }
 
     if (this._stateObj.state === "on" && this._history) {
