@@ -240,12 +240,12 @@ class CircularTimerCard extends LitElement {
   _generateBarData() {
     var pad = 1;
 
-    var width = (100 + pad) / this._bins - pad;
+    var width = (100 + this._padAngle) / this._bins - this._padAngle;
     var height = 8;
 
     var data = [];
     for (var i = 0; i < this._bins; i++) {
-      var x = i * (width + pad);
+      var x = i * (width + this._padAngle);
       var y = 0;
 
       data.push({ x: x, y: y, width: width, height: height, id: i });
