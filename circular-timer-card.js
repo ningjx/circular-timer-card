@@ -28,6 +28,7 @@ class CircularTimerCard extends LitElement {
     //this.addEventListener("dblclick", this._double_tap);
   }
 
+
   static get properties() {
     return {
       _config: {},
@@ -83,7 +84,7 @@ class CircularTimerCard extends LitElement {
       if (config.layout === "minimal") {
         this._secondaryInfoSize = "80%";
       } else {
-        this._secondaryInfoSize = "140%";
+        this._secondaryInfoSize = "160%";
       }
     }
 
@@ -174,43 +175,51 @@ class CircularTimerCard extends LitElement {
   _renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
     return html`
 
-      <div class="header ">
+      <div class="header">
         <div class="innerheader">
-          <div class="icon clickable" style="${iconStyle}">
-            <ha-icon icon="${icon}" style="color: ${textColor};"></ha-icon>
+          <div class="icon clickable " style="${iconStyle}">
+            <ha-icon class="hoverable" icon="${icon}" style="color: ${textColor};"></ha-icon>
           </div>
           <div class="info">
             <span class="primary" style="color: ${textColor};">${secondaryInfo}</span>
             <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
           </div>
         </div>
-
-        <svg viewBox="0 0 100 8" class="minimalsvg">
-          <g transform="translate(0,0)">
-            ${repeat(this._barData, d => d.id, (d, index) => svg`
-              <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
-            `)}
-          </g>
-        </svg>
-      </div>
+        
+          <svg viewBox="0 0 100 8" class="minimalsvg">
+            <g transform="translate(0,0)">
+              ${repeat(this._barData, d => d.id, (d, index) => svg`
+                <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
+              `)}
+            </g>
+          </svg>
+        </div>
     `;
   }
 
   _renderDefaultLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
     return html`
-        <div class="centerlayout clickable">
+ 
+        <div name="div1" class="centerlayout  centerhover">
           <ha-icon class="icon2" icon="${icon}" style="color: ${textColor};"></ha-icon>
-          <span id="countdown" style="color:${textColor};font-size: 370%;">${primaryInfo}</span>
+          <span id="countdown" style="color:${textColor};font-size: 370%;
+          text-shadow: -1px -1px 0 var(--primary-background-color),  
+                        1px -1px 0 var(--primary-background-color),
+                       -1px 1px 0 var(--primary-background-color),
+                        1px 1px 0 var(--primary-background-color);">${primaryInfo}</span>
           <span id="timer-name" style="color:${textColor}; font-size:${this._secondaryInfoSize};">${secondaryInfo}</span>
         </div>
 
-      <svg viewBox="0 0 100 100">
-        <g transform="translate(50,50)">
-          ${repeat(this._arcData, d => d.id, (d, index) => svg`
-            <path class="arc" d=${d.arc} fill=${this._getBinColor(colorData, index, limitBin)} />
-          `)}
-        </g>
-      </svg>
+        <div name="div2" style="position: relative;z-index: 1;transition: transform 0.8s ease;">
+          <svg viewBox="0 0 100 100">
+            <g transform="translate(50,50)">
+              ${repeat(this._arcData, d => d.id, (d, index) => svg`
+                <path class="arc" d=${d.arc} fill=${this._getBinColor(colorData, index, limitBin)} />
+              `)}
+            </g>
+          </svg>
+        </div>
+    
     `;
   }
 
@@ -468,10 +477,22 @@ class CircularTimerCard extends LitElement {
         justify-content: space-between; 
         align-items: center; 
         justify-content: center;
+        z-index: 2;
       }
 
       .centerlayout > * {
         margin: 10px 0;
+      }
+
+      .centerhover {
+        transition: transform 0.8s ease;
+      }
+      .centerhover:hover {
+        transform: scale(1.2); /* 鼠标悬停时放大为原来的1.2倍 */
+      }
+      
+      .centerhover:hover + div[name="div2"] {
+        transform: scale(0.8); /* 鼠标悬停时缩小为原来的0.8倍 */
       }
 
       ha-icon {
@@ -505,6 +526,10 @@ class CircularTimerCard extends LitElement {
         text-transform: capitalize;
       }
 
+      .my-custom-card {
+        background-color: var(--lovelace-background-color);
+      }
+
       .icon {
         width: 40px;
         height: 40px;
@@ -531,7 +556,7 @@ class CircularTimerCard extends LitElement {
         border-radius: 500px;
       }
 
-      @keyframes clickAnimation1 {
+      @keyframes clickAnimation {
         0% {
           transform: scale(1);
         }
@@ -544,32 +569,16 @@ class CircularTimerCard extends LitElement {
       }
 
       .clickable:active {
-        animation: clickAnimation1 0.2s ease;
+        animation: clickAnimation 0.2s ease;
       }
 
-      @keyframes clickAnimation2 {
-        0% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.1);
-        }
-        100% {
-          transform: scale(1);
-        }
+      .hoverable {
+        transition: transform 0.5s ease;
       }
-
-      .click2:active {
-        animation: clickAnimation2 0.2s ease;
-      }
-
-      /* Hover effect */
+      
       .hoverable:hover {
-        color: var(--primary-text-color);
-      }
-
-      .icon-hoverable:hover {
-        color: var(--primary-text-color);
+        transform: scale(1.2);
+        color: blue;
       }
     `;
   }
