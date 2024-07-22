@@ -51,7 +51,7 @@ class CircularTimerCard extends LitElement {
     this._seqmentSize = 360 / this._bins;
     this._primaryInfo = config.primary_info || "timer";
     this._secondaryInfo = config.secondary_info || "name";
-    this._secondaryInfoSize = config.secondary_info_size || "12px";
+    this._secondaryInfoSize = config.secondary_info_size || "30px";
     this._layout = config.layout || "circle";
     this._padAngle = config.pad_angle || 1;
     this._circleType = config.circle_type || "second";
@@ -83,7 +83,7 @@ class CircularTimerCard extends LitElement {
       if (config.layout === "minimal") {
         this._secondaryInfoSize = "80%";
       } else {
-        this._secondaryInfoSize = "50%";
+        this._secondaryInfoSize = "140%";
       }
     }
 
@@ -125,33 +125,36 @@ class CircularTimerCard extends LitElement {
     let dMinute = 0;
     let dHour = 0;
     let proc = 0;
-    let limitBin = 0;
+    let limitBin = 0; 
 
-    if (this._stateObj.state !== "on")
+    if (this._stateObj.state != "on" )
       this._history_ready = false;
 
-    if (this._stateObj.state === "on" && !this._isFetchingHistory && !this._history_ready) {
+    if (this._stateObj.state == "on" && !this._history_ready) {
       this._fetchHistory(this._config.entity);
       this._history_ready = true;
     }
 
-    if (this._stateObj.state === "on" && this._history) {
+    if (this._stateObj.state == "on" && this._history) 
+    {
+      this._off_count = 0;
       const onTime = this._getEntityOnTime(this._history);
       const timeGap = this._calculateTimeDifference(onTime).split(':');
       dSec = +timeGap[0] * 60 * 60 + +timeGap[1] * 60 + +timeGap[2];
       dMinute = +timeGap[0] * 60 + +timeGap[1];
       dHour = +timeGap[0];
 
-      if (this._circleType === "minute")
-        proc = dMinute % this._bins / this._bins;
-      else if (this._circleType === "hour")
+      if (this._circleType == "minute")
+        proc = dMinute % this._bins  / this._bins;
+      else if (this._circleType == "hour")
         proc = dHour % this._bins / this._bins;
       else
         proc = dSec % this._bins / this._bins;
 
-      limitBin = Math.floor(this._bins * proc) + 1;
+      if(proc == 0) proc = 1;
+      limitBin = Math.floor(this._bins * proc);
     }
-
+    console.log("limitBin proc",limitBin,proc);
     const colorData = this._generateArcColorData(limitBin);
     const textColor = this._getTextColor(proc);
 
@@ -161,14 +164,14 @@ class CircularTimerCard extends LitElement {
 
     return html`
       <ha-card>
-        ${this._layout === "minimal" ? this._renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) : this._renderDefaultLayout(textColor, primaryInfo, secondaryInfo, limitBin, colorData)}
+        ${this._layout === "minimal" ? this._renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) : this._renderDefaultLayout(icon, iconStyle,textColor, primaryInfo, secondaryInfo, limitBin, colorData)}
       </ha-card>
     `;
   }
 
   _renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
     return html`
-      <div class="header">
+      <div class="header clickable">
         <div class="icon" style="${iconStyle}">
           <ha-icon icon="${icon}" style="color: ${textColor};"></ha-icon>
         </div>
@@ -177,6 +180,7 @@ class CircularTimerCard extends LitElement {
           <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
         </div>
       </div>
+      
       <svg viewBox="0 0 100 8">
         <g transform="translate(0,0)">
           ${repeat(this._barData, d => d.id, (d, index) => svg`
@@ -187,19 +191,19 @@ class CircularTimerCard extends LitElement {
     `;
   }
 
-  _renderDefaultLayout(textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
+  _renderDefaultLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) {
     return html`
+        <div class="centerlayout clickable">
+          <ha-icon class="icon2" icon="${icon}" style="color: ${textColor};"></ha-icon>
+          <span id="countdown" style="color:${textColor};font-size: 350%;">${primaryInfo}</span>
+          <span id="timer-name" style="color:${textColor}; font-size:${this._secondaryInfoSize};">${secondaryInfo}</span>
+        </div>
+
       <svg viewBox="0 0 100 100">
         <g transform="translate(50,50)">
           ${repeat(this._arcData, d => d.id, (d, index) => svg`
             <path class="arc" d=${d.arc} fill=${this._getBinColor(colorData, index, limitBin)} />
           `)}
-        </g>
-        <g transform="translate(50,45)">
-          <text id="countdown" text-anchor="middle" dominant-baseline="central" fill=${textColor}>${primaryInfo}</text>
-        </g>
-        <g transform="translate(50,55)">
-          <text id="timer-name" text-anchor="middle" dominant-baseline="central" fill=${textColor} style="font-size:${this._secondaryInfoSize};">${secondaryInfo}</text>
         </g>
       </svg>
     `;
@@ -359,19 +363,16 @@ class CircularTimerCard extends LitElement {
   }
 
   _fetchHistory(entity) {
-    this._isFetchingHistory = true;
     fetch(`/api/history/period?filter_entity_id=${entity}`, {
       headers: { Authorization: `Bearer ${this._config.token}` },
     })
       .then(response => response.json())
       .then(data => {
         this._history = data;
-        this._isFetchingHistory = false;
-        this.requestUpdate();
+        //this.requestUpdate();
       })
       .catch(error => {
         console.error('Error fetching history:', error);
-        this._isFetchingHistory = false;
       });
   }
 
@@ -410,7 +411,6 @@ class CircularTimerCard extends LitElement {
       }
       #timer-name {
         font-weight: 600;
-
         text-transform: capitalize;
       }
       #compact-countdown {
@@ -425,6 +425,20 @@ class CircularTimerCard extends LitElement {
         cursor: pointer;
 
         margin-bottom: 10px;
+      }
+      .centerlayout {
+        position: absolute;
+        width: calc(100% - 20px);
+        height: calc(90% - 20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+        align-items: center; 
+        justify-content: center;
+      }
+
+      .centerlayout > * {
+        margin: 10px 0;
       }
 
       ha-icon {
@@ -472,6 +486,42 @@ class CircularTimerCard extends LitElement {
 
         background: rgba(34, 34, 34, 0.05);
         border-radius: 500px;
+      }
+
+      .icon2 {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(34, 34, 34, 0.05);
+        border-radius: 500px;
+      }
+
+      /* Click animation */
+      @keyframes clickAnimation {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .clickable:active {
+        animation: clickAnimation 0.2s ease;
+      }
+
+      /* Hover effect */
+      .hoverable:hover {
+        color: var(--primary-text-color);
+      }
+
+      .icon-hoverable:hover {
+        color: var(--primary-text-color);
       }
     `;
   }
