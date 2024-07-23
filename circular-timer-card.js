@@ -189,7 +189,7 @@ class CircularTimerCard extends LitElement {
           <svg viewBox="0 0 100 8" class="minimalsvg">
             <g transform="translate(0,0)">
               ${repeat(this._barData, d => d.id, (d, index) => svg`
-                <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="1" fill=${this._getBinColor(colorData, index, limitBin)} />
+                <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="0.5" fill=${this._getBinColor(colorData, index, limitBin)} />
               `)}
             </g>
           </svg>
