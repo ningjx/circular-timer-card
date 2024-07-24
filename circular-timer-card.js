@@ -146,14 +146,19 @@ class CircularTimerCard extends LitElement {
         dMinute = +timeGap[0] * 60 + +timeGap[1];
         dHour = +timeGap[0];
   
-        if (this._circleType === "minute")
+        if (this._circleType === "minute"){
           proc = dMinute % this._bins  / this._bins;
-        else if (this._circleType === "hour")
-          proc = dHour % this._bins / this._bins;
-        else if (this._circleType === "second")
+          if(dMinute > 0 && proc == 0) proc = 1;
+        }
+        else if (this._circleType === "hour"){
+         proc = dHour % this._bins / this._bins;
+          if(dHour > 0 && proc == 0) proc = 1;
+        }
+        else if (this._circleType === "second"){
           proc = dSec % this._bins / this._bins;
-  
-        if(dSec > 0 && proc == 0) proc = 1;
+          if(dSec > 0 && proc == 0) proc = 1;
+        }
+        
         limitBin = Math.floor(this._bins * proc);
       }
     }
