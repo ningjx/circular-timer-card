@@ -151,7 +151,7 @@ class CircularTimerCard extends LitElement {
           if(dMinute > 0 && proc == 0) proc = 1;
         }
         else if (this._circleType === "hour"){
-         proc = dHour % this._bins / this._bins;
+          proc = dHour % this._bins / this._bins;
           if(dHour > 0 && proc == 0) proc = 1;
         }
         else if (this._circleType === "second"){
