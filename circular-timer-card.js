@@ -56,7 +56,7 @@ class CircularTimerCard extends LitElement {
     this._layout = config.layout || "circle";
     this._padAngle = config.pad_angle || 1;
     this._circleType = config.circle_type || "second";
-    this._cornerRadius = config.corner_radius || 4;
+    this._cornerRadius = config.corner_radius || 2;
     this._colorState = config.color_state || false;
     this._stateColor = getComputedStyle(
       document.documentElement
@@ -108,6 +108,8 @@ class CircularTimerCard extends LitElement {
     this._barData = this._generateBarData();
   }
   render() {
+    this.firstUpdated();
+    this._barData = this._generateBarData();
     if (!this.hass || !this._config) return html`<ha-card>Loading...</ha-card>`;
 
     this._stateObj = this.hass.states[this._config.entity];
@@ -169,7 +171,6 @@ class CircularTimerCard extends LitElement {
     const displayDSec = this._getTimeString(dSec);
     const primaryInfo = this._primaryInfo === "timer" ? displayDSec : this._name;
     const secondaryInfo = this._secondaryInfo === "name" ? this._name : displayDSec;
-
     return html`
       <ha-card>
         ${this._layout === "minimal" ? this._renderMinimalLayout(icon, iconStyle, textColor, primaryInfo, secondaryInfo, limitBin, colorData) : this._renderDefaultLayout(icon, iconStyle,textColor, primaryInfo, secondaryInfo, limitBin, colorData)}
@@ -186,17 +187,15 @@ class CircularTimerCard extends LitElement {
             <ha-icon class="hoverable" icon="${icon}" style="color: ${textColor};"></ha-icon>
           </div>
           <div class="info">
-            <span class="primary" style="color: ${textColor};">${secondaryInfo}</span>
-            <span class="secondary" style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
+            <span class="primary" height="20px" style="color: ${textColor};">${secondaryInfo}</span>
+            <span class="secondary"  height="16px"  style="font-size:${this._secondaryInfoSize};color: ${textColor};">${primaryInfo}</span>
           </div>
         </div>
         
-          <svg viewBox="0 0 100 8" class="minimalsvg">
-            <g transform="translate(0,0)">
-              ${repeat(this._barData, d => d.id, (d, index) => svg`
-                <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="0.5" fill=${this._getBinColor(colorData, index, limitBin)} />
-              `)}
-            </g>
+          <svg class="minimalsvg" id="minisvg">
+            ${repeat(this._barData, d => d.id, (d, index) => svg`
+              <rect x=${d.x} y=${d.y} width=${d.width} height=${d.height} rx="${this._cornerRadius}" fill=${this._getBinColor(colorData, index, limitBin)} />
+            `)}
           </svg>
         </div>
     `;
@@ -216,7 +215,7 @@ class CircularTimerCard extends LitElement {
         </div>
 
         <div name="div2" style="position: relative;z-index: 1;transition: transform 0.8s ease;">
-          <svg viewBox="0 0 100 100">
+          <svg>
             <g transform="translate(50,50)">
               ${repeat(this._arcData, d => d.id, (d, index) => svg`
                 <path class="arc" d=${d.arc} fill=${this._getBinColor(colorData, index, limitBin)} />
@@ -241,13 +240,29 @@ class CircularTimerCard extends LitElement {
     }
     return data;
   }
-
+  firstUpdated() {
+    super.firstUpdated();
+    requestAnimationFrame(() => {
+      const svgElement = this.shadowRoot.querySelector('#minisvg');
+      //console.log(svgElement); // 可以对svgElement进行操作
+      //const boundingRect = svgElement.getBoundingClientRect(); // 获取元素的边界矩形
+      //const width = boundingRect.width; // 获取实际的宽度
+      //const width = svgElement.getAttribute('width'); // 获取 width 属性的值
+      //const renderedWidth = svgElement.clientWidth;
+      //console.log(renderedWidth);
+      this._barWidth = svgElement.clientWidth;
+    });
+  }
   _generateBarData() {
     var pad = 1;
+    var width = 0.1;
+    if(this._barWidth && this._barWidth > 0)
+      width = (this._barWidth + this._padAngle) / this._bins - this._padAngle;
+    
+    //console.log('多少',width);
+    if(width < 0) width = 0.1;
 
-    var width = (100 + this._padAngle) / this._bins - this._padAngle;
-    var height = 8;
-
+    var height = 42;
     var data = [];
     for (var i = 0; i < this._bins; i++) {
       var x = i * (width + this._padAngle);
@@ -428,7 +443,7 @@ class CircularTimerCard extends LitElement {
   static get styles() {
     return css`
       ha-card {
-        padding: 16px;
+        padding: 12px;
       }
 
       path:hover {
@@ -452,7 +467,7 @@ class CircularTimerCard extends LitElement {
 
       .header {
         width: 100%;
-        height: 96px;
+        height: 98px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -465,12 +480,12 @@ class CircularTimerCard extends LitElement {
         justify-content: flex-start;
         cursor: pointer;
 
-        margin-bottom: 16px;
+        margin-bottom: 10px;
       }
 
       .minimalsvg {
         width: 100%;
-        height: 40px;
+        height: 42px;
       }
       
       .centerlayout {
