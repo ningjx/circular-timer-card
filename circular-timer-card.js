@@ -244,13 +244,8 @@ class CircularTimerCard extends LitElement {
     super.firstUpdated();
     requestAnimationFrame(() => {
       const svgElement = this.shadowRoot.querySelector('#minisvg');
-      //console.log(svgElement); // 可以对svgElement进行操作
-      //const boundingRect = svgElement.getBoundingClientRect(); // 获取元素的边界矩形
-      //const width = boundingRect.width; // 获取实际的宽度
-      //const width = svgElement.getAttribute('width'); // 获取 width 属性的值
-      //const renderedWidth = svgElement.clientWidth;
-      //console.log(renderedWidth);
-      this._barWidth = svgElement.clientWidth;
+      if(svgElement.clientWidth && svgElement.clientWidth > 0)
+        this._barWidth = svgElement.clientWidth;
     });
   }
   _generateBarData() {
