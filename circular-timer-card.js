@@ -251,8 +251,13 @@ class CircularTimerCard extends LitElement {
   _generateBarData() {
     var pad = 1;
     var width = 0.1;
-    if(this._barWidth && this._barWidth > 0)
-      width = (this._barWidth + this._padAngle) / this._bins - this._padAngle;
+    var delta = 0.1;
+    const scale = 4.5; //scale = width / delta
+    if(this._barWidth && this._barWidth > 0){
+      width = scale * this._barWidth / ((scale + 1) * this._bins - 1);// (this._barWidth + this._padAngle) / this._bins - this._padAngle;
+      delta = width / scale;
+    }
+      
     
     //console.log('多少',width);
     if(width < 0) width = 0.1;
@@ -260,7 +265,7 @@ class CircularTimerCard extends LitElement {
     var height = 42;
     var data = [];
     for (var i = 0; i < this._bins; i++) {
-      var x = i * (width + this._padAngle);
+      var x = i * (width + delta);
       var y = 0;
 
       data.push({ x: x, y: y, width: width, height: height, id: i });
