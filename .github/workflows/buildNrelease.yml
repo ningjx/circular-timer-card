@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  # 自动触发：推送 v 开头的 tag（如 v1.0.0）
+  push:
+    tags:
+      - 'v*.*.*'
+
+  # 手动触发：可在 Actions 页面点击 "Run workflow" 并输入版本号
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        default: 'v0.1.0'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # 必须授权才能创建 release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify dist folder exists
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Error: dist folder not found after build!"
+            exit 1
+          fi
+          echo "✅ Contents of dist:"
+          ls -la dist/
+
+      - name: Create GitHub Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          # 如果是手动触发，使用输入的 version；否则使用 tag 名（即 github.ref_name）
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || github.ref_name }}
+          name: Release ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || github.ref_name }}
+          draft: false
+          prerelease: false
+          files: dist/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
