@@ -1,4 +1,4 @@
-name: Release
+name: Build and Release
 
 on:
   # 自动触发：推送 v 开头的 tag（如 v1.0.0）
